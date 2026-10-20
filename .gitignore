@@ -1,0 +1,10 @@
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+desktop.ini
+Thumbs.db
+.env
+.env.*
+!.env.example

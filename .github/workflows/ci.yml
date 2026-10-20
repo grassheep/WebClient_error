@@ -1,0 +1,19 @@
+name: 前端持续集成与契约测试
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  repository_dispatch:
+    types: [contracts-changed]
+
+jobs:
+  contract-gate:
+    name: 契约自动化静态门禁
+    uses: QingMouFoodDate/.github/.github/workflows/reusable-contract-check.yml@main
+    with:
+      lang: typescript
+      code_dir: src/types
+    secrets:
+      CONTRACT_READ_TOKEN: ${{ secrets.CONTRACT_READ_TOKEN }}

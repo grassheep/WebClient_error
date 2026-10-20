@@ -1,0 +1,24 @@
+# 统一提交前四道门禁：JSON 语法校验 + 大体积文件拦截 + 云盘副本 (1) 拦截 + X-AnyLabeling Base64 膨胀拦截
+# 安装：pip install pre-commit && pre-commit install
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.6.0
+    hooks:
+      - id: check-json
+        name: JSON 语法校验
+      - id: check-added-large-files
+        name: 拦截 >500KB 大体积二进制文件入库
+        args: ['--maxkb=500']
+
+  - repo: local
+    hooks:
+      - id: no-cloud-sync-copies
+        name: 禁止云盘同步副本文件名（" (1)" 后缀）
+        entry: python -c "import subprocess,sys; files=subprocess.check_output(['git','ls-files'],text=True).splitlines(); bad=[f for f in files if ' (1)' in f]; bad and print('检测到云盘冲突副本，请恢复原名后再提交:\n'+'\n'.join(bad)); sys.exit(1 if bad else 0)"
+        language: system
+        pass_filenames: false
+      - id: no-image-data-bloat
+        name: 拦截 X-AnyLabeling 嵌入的 Base64 imageData
+        entry: python -c "import sys, json; [sys.exit(1) for f in sys.argv[1:] if f.endswith('.json') and isinstance(json.load(open(f, encoding='utf-8')), dict) and json.load(open(f, encoding='utf-8')).get('imageData') is not None]"
+        language: system
+        types: [json]
