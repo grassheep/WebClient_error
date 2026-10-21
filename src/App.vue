@@ -139,7 +139,16 @@ const showFailure = computed(() => store.state === 'FAILED' && !!store.failure)
 .page {
   max-width: 860px;
   margin: 0 auto;
-  padding: 2.5rem 1.25rem calc(2rem + var(--qm-space-safe-bottom));
+  /*
+   * 左右内边距 = 断点留白 + 安全区 inset。
+   * 横屏握持时刘海在左或右，只补底部会让文字被裁掉。
+   */
+  padding-top: calc(var(--qm-page-block) + var(--qm-safe-top));
+  padding-right: calc(var(--qm-page-inline) + var(--qm-safe-right));
+  padding-bottom: calc(var(--qm-page-block) + var(--qm-safe-bottom));
+  padding-left: calc(var(--qm-page-inline) + var(--qm-safe-left));
+  /* dvh 优先，老内核退回 vh —— 保证内容不满屏时背景也是完整一屏 */
+  min-height: var(--qm-vh-full);
 }
 
 .masthead {
@@ -147,6 +156,7 @@ const showFailure = computed(() => store.state === 'FAILED' && !!store.failure)
   align-items: flex-start;
   justify-content: space-between;
   gap: 1rem;
+  flex-wrap: wrap;
   margin-bottom: 1.5rem;
 }
 
@@ -197,6 +207,18 @@ const showFailure = computed(() => store.state === 'FAILED' && !!store.failure)
   padding: 0.5rem 0.95rem;
   font-size: 0.85rem;
   cursor: pointer;
+  /* 触控目标：桌面 34px，触屏 44px（令牌随 pointer:coarse 切换） */
+  min-height: var(--qm-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+/* 手机上给明确的按压反馈，替代被关掉的灰色高亮 */
+.btn:active:not(:disabled) {
+  background: var(--qm-surface-sunken);
+  border-color: var(--qm-border-strong);
 }
 
 .btn:disabled {
@@ -221,6 +243,10 @@ const showFailure = computed(() => store.state === 'FAILED' && !!store.failure)
   background: var(--qm-surface-sunken);
   color: var(--qm-text-secondary);
   font-size: 0.76rem;
+  /* 不参与拉伸，否则父级的 align-items: stretch 会把它挤成圆形 */
+  flex: none;
+  align-self: center;
+  white-space: nowrap;
 }
 
 .state-chip[data-state='RESULT_READY'] {
@@ -360,17 +386,135 @@ const showFailure = computed(() => store.state === 'FAILED' && !!store.failure)
   color: var(--qm-text-tertiary);
 }
 
-@media (max-width: 560px) {
-  .page {
-    padding: 1.5rem 0.85rem calc(1.5rem + var(--qm-space-safe-bottom));
+/* ============================================================
+   平板与以下（≤ 1023px，含 iPad 竖屏 768）
+   这一档不再沿用桌面的紧凑按钮：87px 宽的"开始查验"握着平板点不准。
+   让它吃掉 chip 之外的整行空间，但不像手机那样强制 100%。
+   ============================================================ */
+@media (max-width: 1023px) {
+  .submit-row .btn-primary {
+    flex: 1 1 auto;
+  }
+}
+
+/* ============================================================
+   手机竖屏（≤ 767px）
+   页面留白已由令牌 --qm-page-* 控制，此处不再覆写 padding，
+   否则会把安全区的 calc() 简写覆盖掉。
+   ============================================================ */
+@media (max-width: 767px) {
+  .masthead {
+    margin-bottom: 1.1rem;
   }
 
   .masthead h1 {
     font-size: 1.15rem;
   }
 
-  .state-chip {
+  .panel {
+    padding: 1rem;
+    border-radius: var(--qm-radius-md);
+  }
+
+  /* 主操作按钮占满一行：手机上拇指命中最舒服的位置是整行宽 */
+  .submit-row {
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .submit-row .btn-primary {
+    flex: 1 1 100%;
+  }
+
+  .submit-row .state-chip {
     margin-left: 0;
+    margin-right: auto;
+    align-self: center;
+  }
+
+  /* 进度条从固定 22px 改成平分整行，视觉上铺满更清楚 */
+  .steps {
+    gap: 0.35rem;
+  }
+
+  .steps li {
+    flex: 1;
+  }
+
+  .steps .dot {
+    width: 100%;
+  }
+
+  /* 4 个字段排成 2×2，比单列更省纵向空间，一屏能看完 */
+  .result-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem;
+  }
+
+  /* 第四项是"生产 / 到期"双日期，半列宽放不下会折成三行，让它独占一行 */
+  .result-grid > *:nth-child(4) {
+    grid-column: 1 / -1;
+  }
+
+  .result-value {
+    font-size: 1.05rem;
+  }
+
+  .foot {
+    margin-top: 1rem;
+    font-size: 0.72rem;
+  }
+}
+
+/* ============================================================
+   低高度横屏（手机横握）：纵向空间紧张，优先压缩留白与字号
+   ============================================================ */
+@media (orientation: landscape) and (max-height: 500px) {
+  .masthead {
+    margin-bottom: 0.75rem;
+  }
+
+  .subtitle,
+  .foot-dim {
+    display: none;
+  }
+
+  .foot {
+    margin-top: 0.5rem;
+  }
+
+  /*
+   * 横屏手机宽度 844px 已越过 767 断点，宽度判定会漏掉它，
+   * 主按钮会缩成贴着左边的一小段。按"低高度即手机"补回拉伸。
+   */
+  .submit-row {
+    align-items: stretch;
+  }
+
+  .submit-row .btn-primary {
+    flex: 1 1 auto;
+  }
+
+  /* 进度条同样铺满：横屏下固定 22px 的短条会缩在左侧一小截 */
+  .steps li {
+    flex: 1;
+  }
+
+  .steps .dot {
+    width: 100%;
+  }
+}
+
+/* ============================================================
+   极窄屏（< 360px，如 320px 老机型）：状态标签会挤掉标题
+   ============================================================ */
+@media (max-width: 359px) {
+  .mock-badge {
+    font-size: 0.68rem;
+  }
+
+  .result-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>

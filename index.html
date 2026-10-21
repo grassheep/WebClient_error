@@ -2,9 +2,26 @@
 <html lang="zh-CN">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <!--
+      viewport-fit=cover 是安全区生效的硬前提：
+      不加它，env(safe-area-inset-*) 在 iOS 上恒为 0，底部 padding 白调。
+      interactive-widget=resizes-content：软键盘弹出时压缩内容区而不是整页上推（Chrome 108+，其余浏览器忽略）
+    -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#ffffff" />
+    <!-- 亮暗两套地址栏配色，避免暗色模式顶部出现一条白边 -->
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#14161a" media="(prefers-color-scheme: dark)" />
+    <!--
+      本页大量展示 2026-11-01 这类日期文本，iOS 的自动识别会把它变蓝并包成 tel: 链接，
+      点一下就会跳拨号界面。关掉格式探测。
+    -->
+    <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <title>轻眸识刻 · 包装日期标示核验</title>
   </head>
   <body>

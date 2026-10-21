@@ -22,8 +22,7 @@ const acceptAttr = ACCEPTED_MIME_TYPES.join(',')
 
 const hint = computed(() => {
   if (props.preparing) return '正在压缩与生成预览…'
-  if (props.prepared) return '点击图片可重新选择，或重新拖入文件'
-  return 'JPEG / PNG，单张上限 15MB，客户端自动压缩至约 1MB'
+  return 'JPEG / PNG · 单张上限 15MB · 自动压缩至约 1MB'
 })
 
 function pickFromDevice(): void {
@@ -112,7 +111,10 @@ function handleDragLeave(): void {
             stroke-linejoin="round"
           />
         </svg>
-        <p class="title">拖拽包装实拍图到这里</p>
+        <p class="title">
+          <span class="when-pointer">拖拽包装实拍图到这里</span>
+          <span class="when-touch">点按选择包装实拍图</span>
+        </p>
         <p class="hint">{{ hint }}</p>
       </div>
     </template>
@@ -181,6 +183,9 @@ function handleDragLeave(): void {
   margin: 0;
   font-size: 0.8rem;
   color: var(--qm-text-tertiary);
+  /* 短文案在两行时均匀折行，避免出现"约 / 1MB"这种孤字 */
+  text-wrap: balance;
+  max-width: 26rem;
 }
 
 .preview {
@@ -189,12 +194,13 @@ function handleDragLeave(): void {
   background: var(--qm-surface-sunken);
   display: flex;
   justify-content: center;
-  max-height: 320px;
+  /* 上限随视口高度变化：低高度横屏时自动收缩，避免图片挤掉操作按钮 */
+  max-height: var(--qm-preview-max);
 }
 
 .preview img {
   max-width: 100%;
-  max-height: 320px;
+  max-height: var(--qm-preview-max);
   object-fit: contain;
   display: block;
 }
@@ -249,7 +255,17 @@ function handleDragLeave(): void {
   padding: 0.5rem 0.95rem;
   font-size: 0.85rem;
   cursor: pointer;
+  /* 触控目标：桌面 34px，触屏 44px */
+  min-height: var(--qm-touch-min);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn:active:not(:disabled) {
+  background: var(--qm-surface-sunken);
+  border-color: var(--qm-border-strong);
 }
 
 .btn:hover:not(:disabled) {
@@ -288,5 +304,109 @@ function handleDragLeave(): void {
   clip: rect(0 0 0 0);
   white-space: nowrap;
   border: 0;
+}
+
+/* 拖拽是鼠标独有的语义：触屏设备上说"拖拽"会误导，换成"点按" */
+.when-touch {
+  display: none;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .when-pointer {
+    display: none;
+  }
+
+  .when-touch {
+    display: inline;
+  }
+}
+
+/* 平板档（≤ 1023px，含 iPad 竖屏）：按钮同样不该缩成一小段 */
+@media (max-width: 1023px) {
+  .actions .btn {
+    flex: 1;
+  }
+}
+
+@media (max-width: 767px) {
+  .dropzone {
+    padding: 1rem;
+  }
+
+  /*
+   * 手机上没有悬停预览，用户是盲点。
+   * 给占位区一个明确的最小高度，保证"可点区域"足够大且一眼看出这是按钮。
+   */
+  .placeholder {
+    /*
+     * max(200px, 34dvh)：屏幕高时按比例撑开，屏幕矮时不低于 200px。
+     * 若直接写 34dvh，320×568 这类小屏只剩 170px，点击区反而变小 —— dvh 只该放大不该缩小。
+     * 前一行的 px 是不支持 dvh 时的兜底。
+     */
+    min-height: 200px;
+    min-height: max(200px, 34dvh);
+    justify-content: center;
+    padding: 1.5rem 0;
+  }
+
+  .icon {
+    width: 44px;
+    height: 44px;
+  }
+
+  .title {
+    font-size: 1rem;
+  }
+
+  /* 两个按钮平分一行，拇指不用横向找 */
+  .actions {
+    gap: 0.5rem;
+  }
+
+  .actions .btn {
+    flex: 1;
+  }
+
+  .meta {
+    gap: 0.75rem 1rem;
+    font-size: 0.76rem;
+  }
+}
+
+@media (max-width: 479px) {
+  .dropzone {
+    padding: 0.85rem;
+  }
+
+  .placeholder {
+    min-height: 200px;
+    min-height: max(200px, 30dvh);
+  }
+
+  .hint {
+    font-size: 0.76rem;
+  }
+}
+
+/* 低高度横屏：占位区不再撑高度，把空间让给预览与操作 */
+@media (orientation: landscape) and (max-height: 500px) {
+  .placeholder {
+    min-height: 0;
+    padding: 0.75rem 0;
+  }
+
+  .icon {
+    width: 32px;
+    height: 32px;
+    margin-bottom: 0.25rem;
+  }
+
+  /*
+   * 横屏手机宽度 844px 已越过 767 断点，光靠宽度判定会漏掉它，
+   * 结果按钮缩成一小段贴在左边、拇指够不着。这里按"仍是触屏"补回拉伸布局。
+   */
+  .actions .btn {
+    flex: 1;
+  }
 }
 </style>
