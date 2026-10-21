@@ -1,0 +1,24 @@
+{
+  "name": "qingmou-webclient",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "轻眸识刻 Web 端：单图识别闭环与双重视图呈现",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "vue-tsc --noEmit"
+  },
+  "dependencies": {
+    "pinia": "^2.2.6",
+    "vue": "^3.5.13"
+  },
+  "devDependencies": {
+    "@types/node": "^22.9.0",
+    "@vitejs/plugin-vue": "^5.2.1",
+    "typescript": "~5.6.3",
+    "vite": "^5.4.11",
+    "vue-tsc": "^2.1.10"
+  }
+}

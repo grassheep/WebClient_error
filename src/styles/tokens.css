@@ -1,0 +1,90 @@
+/**
+ * 设计令牌基线（CSS Design System 的公共层）。
+ * 新增组件请只引用变量，不要写死色值，便于 T-M0-19 统一做移动端与暗色适配。
+ */
+:root {
+  --qm-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+    'Microsoft YaHei', sans-serif;
+  --qm-font-mono: ui-monospace, SFMono-Regular, 'Cascadia Mono', Consolas, monospace;
+
+  --qm-bg: #f7f8fa;
+  --qm-surface: #ffffff;
+  --qm-surface-sunken: #f1f3f6;
+
+  --qm-border: #e3e6eb;
+  --qm-border-strong: #c9ced7;
+
+  --qm-text-primary: #1a1d23;
+  --qm-text-secondary: #4b5563;
+  --qm-text-tertiary: #8b93a1;
+
+  --qm-accent: #2f6fe4;
+  --qm-accent-strong: #1f57bd;
+  --qm-accent-soft: #eaf1fe;
+
+  --qm-status-within: #1f9254;
+  --qm-status-within-soft: #e8f6ee;
+  --qm-status-near: #b87503;
+  --qm-status-near-soft: #fdf3e2;
+  --qm-status-past: #c0392b;
+  --qm-status-past-soft: #fdeceb;
+  --qm-status-undetermined: #6b7280;
+  --qm-status-undetermined-soft: #f0f1f3;
+
+  --qm-radius-md: 8px;
+  --qm-radius-lg: 12px;
+
+  --qm-space-safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --qm-bg: #14161a;
+    --qm-surface: #1c1f25;
+    --qm-surface-sunken: #23272e;
+
+    --qm-border: #2f343c;
+    --qm-border-strong: #454b55;
+
+    --qm-text-primary: #eef1f5;
+    --qm-text-secondary: #b9c0cb;
+    --qm-text-tertiary: #8a929e;
+
+    --qm-accent: #5c93f0;
+    --qm-accent-strong: #7ba8f4;
+    --qm-accent-soft: #1d2b45;
+
+    --qm-status-within: #4dc57f;
+    --qm-status-within-soft: #14291d;
+    --qm-status-near: #e0a33a;
+    --qm-status-near-soft: #2c2314;
+    --qm-status-past: #ef6a5c;
+    --qm-status-past-soft: #2e1a18;
+    --qm-status-undetermined: #9aa3af;
+    --qm-status-undetermined-soft: #23272e;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--qm-bg);
+  color: var(--qm-text-primary);
+  font-family: var(--qm-font-sans);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+button {
+  font-family: inherit;
+}
